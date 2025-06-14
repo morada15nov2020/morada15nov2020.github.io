@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nosso Tempo</title>
+    <style>
+        /* Documentação do CSS */
+        /* Estilo geral do corpo da página */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #1c1c1c;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh; /* Usamos min-height para garantir que o conteúdo não seja cortado */
+            margin: 0;
+            padding: 20px 0; /* Adiciona um espaçamento para o caso do conteúdo ser maior que a tela */
+            text-align: center;
+        }
+
+        /* Container do Slideshow */
+        .slideshow-container {
+            max-width: 500px;
+            width: 90%; /* Adicionado para melhor responsividade em telas menores */
+            position: relative;
+            margin: auto;
+            border: 3px solid #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+            overflow: hidden;
+        }
+
+        /* As imagens do slideshow */
+        .slide-image {
+            width: 100%;
+            vertical-align: middle;
+            display: none;
+        }
+
+        /* Efeito de fade (esmaecer) */
+        .fade {
+            animation-name: fade;
+            animation-duration: 1.5s;
+        }
+
+        @keyframes fade {
+            from {opacity: .4}
+            to {opacity: 1}
+        }
+
+        /* Estilo para a mensagem do cronómetro */
+        .cronometro-texto {
+            margin-top: 30px;
+            font-size: 1.5em;
+        }
+
+        /* Estilo para o número do cronómetro */
+        #segundos {
+            font-weight: bold;
+            color: #ffcc00;
+        }
+
+        /* Estilo para o container do Spotify */
+        .spotify-container {
+            margin-top: 30px; /* Espaço entre o cronómetro e o player */
+            width: 90%; /* Ocupa 90% da largura disponível */
+            max-width: 500px; /* Largura máxima igual à do slideshow */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="slideshow-container">
+        <img class="slide-image" src="imagens/foto1.jpg" alt="Foto do casal 1">
+        <img class="slide-image" src="imagens/foto2.jpg" alt="Foto do casal 2">
+        <img class="slide-image" src="imagens/foto3.jpg" alt="Foto do casal 3">
+    </div>
+
+    <p class="cronometro-texto">
+        O nosso tempo parou fazem <span id="segundos">0</span> segundos.
+    </p>
+
+    <div class="spotify-container">
+	<iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/2vSgtfnT2Ox9qpCppqoXuw?utm_source=generator&theme=0" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+        </div>
+
+
+    <script>
+        /* Documentação do JavaScript */
+
+        // --- LÓGICA DO SLIDESHOW ---
+        let slideIndex = 0;
+        mostrarSlides();
+
+        function mostrarSlides() {
+            let slides = document.getElementsByClassName("slide-image");
+            for (let i = 0; i < slides.length; i++) {
+                slides[i].style.display = "none";
+            }
+            slideIndex++;
+            if (slideIndex > slides.length) {
+                slideIndex = 1;
+            }
+            slides[slideIndex - 1].style.display = "block";
+            slides[slideIndex - 1].classList.add("fade");
+            setTimeout(mostrarSlides, 4000);
+        }
+
+        // --- LÓGICA DO CRONÓMETRO ---
+        const dataInicio = new Date(2020, 10, 15, 19, 10, 0);
+        const elementoSegundos = document.getElementById("segundos");
+
+        function atualizarCronometro() {
+            const agora = new Date();
+            const diferenca = agora - dataInicio;
+            const segundosTotais = Math.floor(diferenca / 1000);
+            elementoSegundos.textContent = segundosTotais.toLocaleString('pt-BR');
+        }
+
+        atualizarCronometro();
+        setInterval(atualizarCronometro, 1000);
+
+    </script>
+
+</body>
+</html>
