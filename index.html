@@ -5,124 +5,754 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nosso Tempo</title>
     <style>
-        /* Documentação do CSS */
-        /* Estilo geral do corpo da página */
         body {
             font-family: 'Arial', sans-serif;
-            background-color: #1c1c1c;
+            background-color: #0b0f19;
             color: #ffffff;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            min-height: 100vh; /* Usamos min-height para garantir que o conteúdo não seja cortado */
+            min-height: 100vh;
             margin: 0;
-            padding: 20px 0; /* Adiciona um espaçamento para o caso do conteúdo ser maior que a tela */
+            padding: 30px 0;
             text-align: center;
+            position: relative;
+            overflow-x: hidden;
         }
 
-        /* Container do Slideshow */
+        #ceu-estrelado {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
         .slideshow-container {
             max-width: 500px;
-            width: 90%; /* Adicionado para melhor responsividade em telas menores */
+            width: 90%;
             position: relative;
-            margin: auto;
-            border: 3px solid #fff;
-            border-radius: 10px;
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+            margin: 0 auto;
+            border: 3px solid rgba(255, 255, 255, 0.85);
+            border-radius: 12px;
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.7), 0 0 15px rgba(255, 255, 255, 0.15);
             overflow: hidden;
+            background-color: rgba(11, 15, 25, 0.6);
+            user-select: none;
         }
 
-        /* As imagens do slideshow */
         .slide-image {
             width: 100%;
             vertical-align: middle;
             display: none;
+            cursor: pointer;
         }
 
-        /* Efeito de fade (esmaecer) */
         .fade {
-            animation-name: fade;
-            animation-duration: 1.5s;
+            animation: fade 0.5s ease-in-out;
         }
 
         @keyframes fade {
-            from {opacity: .4}
-            to {opacity: 1}
+            from { opacity: 0.4; }
+            to { opacity: 1; }
         }
 
-        /* Estilo para a mensagem do cronómetro */
+        .prev, .next {
+            cursor: pointer;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            padding: 12px 15px;
+            color: #ffffff;
+            font-weight: bold;
+            font-size: 20px;
+            transition: background-color 0.3s ease;
+            border-radius: 50%;
+            background-color: rgba(0, 0, 0, 0.5);
+            border: none;
+            line-height: 1;
+            z-index: 2;
+        }
+
+        .prev { left: 10px; }
+        .next { right: 10px; }
+
+        .prev:hover, .next:hover {
+            background-color: rgba(0, 0, 0, 0.85);
+        }
+
+        .dots-container {
+            position: absolute;
+            bottom: 10px;
+            width: 100%;
+            text-align: center;
+            z-index: 2;
+        }
+
+        .dot {
+            cursor: pointer;
+            height: 10px;
+            width: 10px;
+            margin: 0 4px;
+            background-color: rgba(255, 255, 255, 0.45);
+            border-radius: 50%;
+            display: inline-block;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .dot.active, .dot:hover {
+            background-color: #ffcc00;
+            transform: scale(1.2);
+        }
+
         .cronometro-texto {
             margin-top: 30px;
-            font-size: 1.5em;
+            padding: 14px 24px;
+            font-size: 1.45em;
+            background: rgba(11, 15, 25, 0.7);
+            backdrop-filter: blur(6px);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            max-width: 90%;
+            box-sizing: border-box;
         }
 
-        /* Estilo para o número do cronómetro */
         #segundos {
             font-weight: bold;
             color: #ffcc00;
         }
 
-        /* Estilo para o container do Spotify */
+        .coordenadas-ceu {
+            margin-top: 8px;
+            font-size: 0.72em;
+            color: rgba(255, 255, 255, 0.55);
+            letter-spacing: 0.5px;
+        }
+
         .spotify-container {
-            margin-top: 30px; /* Espaço entre o cronómetro e o player */
-            width: 90%; /* Ocupa 90% da largura disponível */
-            max-width: 500px; /* Largura máxima igual à do slideshow */
+            margin-top: 25px;
+            width: 90%;
+            max-width: 500px;
+        }
+
+        /* Seção protegida por senha (Link do Drive) */
+        .drive-lock-container {
+            margin-top: 25px;
+            width: 90%;
+            max-width: 500px;
+            padding: 16px 20px;
+            box-sizing: border-box;
+            background: rgba(11, 15, 25, 0.7);
+            backdrop-filter: blur(6px);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .drive-trigger {
+            background: none;
+            border: none;
+            color: #ffcc00;
+            font-size: 1.08em;
+            font-family: inherit;
+            text-decoration: underline;
+            text-underline-offset: 4px;
+            cursor: pointer;
+            padding: 4px 8px;
+            transition: opacity 0.25s ease;
+        }
+
+        .drive-trigger:hover {
+            opacity: 0.8;
+        }
+
+        .senha-area {
+            display: none;
+            margin-top: 14px;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .senha-area.visivel {
+            display: flex;
+        }
+
+        .senha-dica {
+            font-size: 0.86em;
+            color: rgba(255, 255, 255, 0.75);
+            margin-bottom: 10px;
+            letter-spacing: 0.5px;
+        }
+
+        .senha-dica strong {
+            color: #ffcc00;
+        }
+
+        .senha-box {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .senha-input {
+            padding: 9px 14px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            background-color: rgba(255, 255, 255, 0.08);
+            color: #ffffff;
+            font-size: 0.95em;
+            outline: none;
+            text-align: center;
+        }
+
+        .senha-input:focus {
+            border-color: #ffcc00;
+        }
+
+        .senha-btn {
+            padding: 9px 16px;
+            border-radius: 8px;
+            border: none;
+            background-color: #ffcc00;
+            color: #0b0f19;
+            font-weight: bold;
+            font-size: 0.95em;
+            cursor: pointer;
+            transition: transform 0.15s ease, opacity 0.2s ease;
+        }
+
+        .senha-btn:hover {
+            opacity: 0.9;
+        }
+
+        .senha-btn:active {
+            transform: scale(0.97);
+        }
+
+        .senha-feedback {
+            margin-top: 10px;
+            font-size: 0.9em;
+            min-height: 1.2em;
+        }
+
+        .senha-erro {
+            color: #ff6b6b;
+        }
+
+        .link-liberado {
+            display: inline-block;
+            margin-top: 6px;
+            color: #7ee787;
+            font-weight: bold;
+            text-decoration: underline;
+        }
+
+        /* Bloco da letra clicável ("Cigana") */
+        .letra-musica-container {
+            margin-top: 25px;
+            width: 90%;
+            max-width: 500px;
+            padding: 20px 22px;
+            box-sizing: border-box;
+            background: rgba(11, 15, 25, 0.72);
+            backdrop-filter: blur(6px);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            cursor: pointer;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .letra-musica-container:hover {
+            border-color: rgba(255, 204, 0, 0.55);
+            box-shadow: 0 0 18px rgba(255, 204, 0, 0.12);
+        }
+
+        .letra-musica-container.tocando {
+            border-color: #ffcc00;
+            box-shadow: 0 0 22px rgba(255, 204, 0, 0.22);
+        }
+
+        .letra-texto {
+            font-style: italic;
+            font-size: 1.02em;
+            line-height: 1.65;
+            color: rgba(255, 255, 255, 0.9);
+            margin: 0;
+        }
+
+        .letra-status {
+            margin-top: 10px;
+            font-size: 0.8em;
+            color: #ffcc00;
+            letter-spacing: 0.4px;
+        }
+
+        .youtube-fallback-link {
+            display: inline-block;
+            margin-top: 12px;
+            font-size: 0.82em;
+            color: rgba(255, 255, 255, 0.65);
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+
+        .youtube-fallback-link:hover {
+            color: #ffcc00;
+        }
+
+        /* Contador pós-término revelado ao clicar na letra */
+        .contador-pos-termino {
+            display: none;
+            margin-top: 16px;
+            padding-top: 14px;
+            border-top: 1px solid rgba(255, 255, 255, 0.12);
+            animation: fade 0.6s ease-in-out;
+        }
+
+        .contador-pos-termino.visivel {
+            display: block;
+        }
+
+        .pos-termino-titulo {
+            font-size: 1.05em;
+            font-weight: bold;
+            color: #ffffff;
+            margin-bottom: 6px;
+        }
+
+        .pos-termino-valor {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #ffcc00;
+        }
+
+        .pos-termino-segundos {
+            margin-top: 4px;
+            font-size: 0.88em;
+            color: rgba(255, 255, 255, 0.65);
         }
     </style>
 </head>
 <body>
 
-    <div class="slideshow-container">
-        <img class="slide-image" src="foto1.jpg" alt="Foto do casal 1">
-        <img class="slide-image" src="foto2.jpg" alt="Foto do casal 2">
-        <img class="slide-image" src="foto3.jpg" alt="Foto do casal 3">
+    <canvas id="ceu-estrelado"></canvas>
+
+    <div class="slideshow-container" id="slideshow">
+        <img class="slide-image" src="foto1.jpg" alt="1° Foto" onclick="mudarSlide(1)">
+        <img class="slide-image" src="foto2.jpg" alt="2° Foto" onclick="mudarSlide(1)">
+        <img class="slide-image" src="foto3.jpg" alt="3° Foto" onclick="mudarSlide(1)">
+
+        <button type="button" class="prev" onclick="mudarSlide(-1)" aria-label="Foto anterior">&#10094;</button>
+        <button type="button" class="next" onclick="mudarSlide(1)" aria-label="Próxima foto">&#10095;</button>
+
+        <div class="dots-container">
+            <span class="dot" onclick="irParaSlide(1)"></span>
+            <span class="dot" onclick="irParaSlide(2)"></span>
+            <span class="dot" onclick="irParaSlide(3)"></span>
+        </div>
     </div>
 
-    <p class="cronometro-texto">
-        O nosso tempo parou fazem <span id="segundos">0</span> segundos.
-    </p>
+    <div class="cronometro-texto">
+        Nosso tempo parou por <span id="segundos">0</span> segundos.
+        <div class="coordenadas-ceu">7°39'29.2"S 35°19'19.3"W • Vicência, PE • 15.11.2020</div>
+    </div>
 
     <div class="spotify-container">
-	<iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/2vSgtfnT2Ox9qpCppqoXuw?utm_source=generator&theme=0" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+        <iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/2vSgtfnT2Ox9qpCppqoXuw?utm_source=generator&theme=0" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+    </div>
+
+    <!-- Bloco com senha acima da parte da música -->
+    <div class="drive-lock-container">
+        <button type="button" class="drive-trigger" id="btn-abrir-senha">
+            Nunca precisou de uma edição
+        </button>
+
+        <div class="senha-area" id="area-senha">
+            <div class="senha-dica">Dica: <strong>HOJE</strong></div>
+            <div class="senha-box">
+                <input type="password" id="campo-senha" class="senha-input" placeholder="Digite a senha" aria-label="Senha">
+                <button type="button" id="btn-validar-senha" class="senha-btn">Desbloquear</button>
+            </div>
         </div>
 
+        <div class="senha-feedback" id="feedback-senha"></div>
+    </div>
+
+    <!-- Trecho clicável da música "Cigana" + Tempo da saudade -->
+    <div class="letra-musica-container" id="bloco-letra" role="button" tabindex="0" aria-label="Tocar música Cigana">
+        <p class="letra-texto">
+            "Oh, morena, diga quando você vem<br>
+            Não aguento mais<br>
+            Preciso matar essa saudade<br>
+            Não me teste, você sabe do que sou<br>
+            Eu faço uma loucura<br>
+            Eu vou te convidar pra uma aventura<br>
+            Algumas coisas o tempo não cura<br>
+            Você não mensura o bem que você me faz"
+        </p>
+        <div class="letra-status" id="status-musica">♪ Clique no trecho para ouvir Cigana</div>
+
+        <div class="contador-pos-termino" id="box-pos-termino">
+            <div class="pos-termino-titulo">Tempo da saudade:</div>
+            <div class="pos-termino-valor" id="tempo-desde-termino">0 dias, 00h 00m 00s</div>
+            <div class="pos-termino-segundos" id="segundos-desde-termino">(0 segundos)</div>
+        </div>
+
+        <a class="youtube-fallback-link" href="https://www.youtube.com/watch?v=EJMd8tSLGw4" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">Abrir música no YouTube</a>
+    </div>
+
+    <!-- Arquivo de áudio local (subir como cigana.mp3 no repositório do GitHub) -->
+    <audio id="audio-cigana" src="cigana.mp3" preload="auto"></audio>
 
     <script>
-        /* Documentação do JavaScript */
+        // --- 1. LÓGICA DO SLIDESHOW CLICÁVEL ---
+        let slideIndex = 1;
+        mostrarSlide(slideIndex);
 
-        // --- LÓGICA DO SLIDESHOW ---
-        let slideIndex = 0;
-        mostrarSlides();
+        function mudarSlide(n) {
+            mostrarSlide(slideIndex += n);
+        }
 
-        function mostrarSlides() {
-            let slides = document.getElementsByClassName("slide-image");
+        function irParaSlide(n) {
+            mostrarSlide(slideIndex = n);
+        }
+
+        function mostrarSlide(n) {
+            const slides = document.getElementsByClassName("slide-image");
+            const dots = document.getElementsByClassName("dot");
+
+            if (slides.length === 0) return;
+            if (n > slides.length) { slideIndex = 1; }
+            if (n < 1) { slideIndex = slides.length; }
+
             for (let i = 0; i < slides.length; i++) {
                 slides[i].style.display = "none";
+                slides[i].classList.remove("fade");
             }
-            slideIndex++;
-            if (slideIndex > slides.length) {
-                slideIndex = 1;
+            for (let i = 0; i < dots.length; i++) {
+                dots[i].classList.remove("active");
             }
+
             slides[slideIndex - 1].style.display = "block";
             slides[slideIndex - 1].classList.add("fade");
-            setTimeout(mostrarSlides, 4000);
+            dots[slideIndex - 1].classList.add("active");
         }
 
-        // --- LÓGICA DO CRONÓMETRO ---
+        document.addEventListener("keydown", function(e) {
+            if (document.activeElement && document.activeElement.id === "campo-senha") return;
+            if (e.key === "ArrowLeft") mudarSlide(-1);
+            if (e.key === "ArrowRight") mudarSlide(1);
+        });
+
+        // --- 2. LÓGICA DO CRONÔMETRO FIXADO (15/11/2020 até 29/03/2026) ---
         const dataInicio = new Date(2020, 10, 15, 19, 10, 0);
-        const elementoSegundos = document.getElementById("segundos");
+        const dataTermino = new Date(2026, 2, 29, 0, 0, 0);
+        const dataFimFixa = new Date(2026, 2, 29, 23, 59, 59);
+        const segundosTotais = Math.floor((dataFimFixa - dataInicio) / 1000);
+        document.getElementById("segundos").textContent = segundosTotais.toLocaleString('pt-BR');
 
-        function atualizarCronometro() {
-            const agora = new Date();
-            const diferenca = agora - dataInicio;
-            const segundosTotais = Math.floor(diferenca / 1000);
-            elementoSegundos.textContent = segundosTotais.toLocaleString('pt-BR');
+        // --- 3. PROTEÇÃO POR SENHA PARA O LINK DO DRIVE ---
+        // TROQUE OS DOIS VALORES ABAIXO PELA SUA SENHA E PELO LINK COMPLETO (COM https://)
+        const SENHA_CORRETA = "15112020";
+        const LINK_DRIVE = "https://drive.google.com/";
+
+        const btnAbrirSenha = document.getElementById("btn-abrir-senha");
+        const areaSenha = document.getElementById("area-senha");
+        const campoSenha = document.getElementById("campo-senha");
+        const btnValidarSenha = document.getElementById("btn-validar-senha");
+        const feedbackSenha = document.getElementById("feedback-senha");
+
+        btnAbrirSenha.addEventListener("click", function() {
+            areaSenha.classList.toggle("visivel");
+            if (areaSenha.classList.contains("visivel")) {
+                campoSenha.focus();
+            }
+        });
+
+        function verificarSenha() {
+            const digitada = campoSenha.value.trim().toUpperCase();
+            const esperada = SENHA_CORRETA.trim().toUpperCase();
+
+            if (digitada === esperada) {
+                areaSenha.classList.remove("visivel");
+                btnAbrirSenha.textContent = "🔓 Nunca precisou de uma edição";
+                feedbackSenha.innerHTML = '<a class="link-liberado" href="' + LINK_DRIVE + '" target="_blank" rel="noopener noreferrer">Acessar arquivo no Drive &rarr;</a>';
+                window.open(LINK_DRIVE, "_blank", "noopener,noreferrer");
+            } else {
+                feedbackSenha.innerHTML = '<span class="senha-erro">Senha incorreta. Tente novamente.</span>';
+                campoSenha.value = "";
+                campoSenha.focus();
+            }
         }
 
-        atualizarCronometro();
-        setInterval(atualizarCronometro, 1000);
+        btnValidarSenha.addEventListener("click", verificarSenha);
+        campoSenha.addEventListener("keydown", function(e) {
+            if (e.key === "Enter") verificarSenha();
+        });
 
+        // --- 4. TRECHO DA MÚSICA (MP3 LOCAL) + TEMPO DA SAUDADE ---
+        const blocoLetra = document.getElementById("bloco-letra");
+        const audioCigana = document.getElementById("audio-cigana");
+        const statusMusica = document.getElementById("status-musica");
+        const boxPosTermino = document.getElementById("box-pos-termino");
+        const elTempoDesdeTermino = document.getElementById("tempo-desde-termino");
+        const elSegundosDesdeTermino = document.getElementById("segundos-desde-termino");
+        let intervaloPosTermino = null;
+
+        function atualizarContadorPosTermino() {
+            const agora = new Date();
+            const diffMs = Math.max(0, agora - dataTermino);
+            const totalSeg = Math.floor(diffMs / 1000);
+
+            const dias = Math.floor(totalSeg / 86400);
+            const horas = Math.floor((totalSeg % 86400) / 3600);
+            const minutos = Math.floor((totalSeg % 3600) / 60);
+            const segundos = totalSeg % 60;
+
+            const pad = (v) => String(v).padStart(2, '0');
+            elTempoDesdeTermino.textContent = `${dias.toLocaleString('pt-BR')} dias, ${pad(horas)}h ${pad(minutos)}m ${pad(segundos)}s`;
+            elSegundosDesdeTermino.textContent = `(${totalSeg.toLocaleString('pt-BR')} segundos)`;
+        }
+
+        function acionarTrechoMusica() {
+            boxPosTermino.classList.add("visivel");
+            atualizarContadorPosTermino();
+            if (!intervaloPosTermino) {
+                intervaloPosTermino = setInterval(atualizarContadorPosTermino, 1000);
+            }
+
+            if (audioCigana.paused) {
+                const playPromise = audioCigana.play();
+                if (playPromise !== undefined) {
+                    playPromise.then(function() {
+                        blocoLetra.classList.add("tocando");
+                        statusMusica.textContent = "❚❚ Tocando: Cigana (clique para pausar)";
+                    }).catch(function() {
+                        statusMusica.textContent = "Se quiser ouça completa no YouTube";
+                    });
+                }
+            } else {
+                audioCigana.pause();
+                blocoLetra.classList.remove("tocando");
+                statusMusica.textContent = "▶ Pausado (clique para continuar)";
+            }
+        }
+
+        audioCigana.addEventListener("ended", function() {
+            blocoLetra.classList.remove("tocando");
+            statusMusica.textContent = "♪ Clique novamente para ouvir";
+        });
+
+        blocoLetra.addEventListener("click", acionarTrechoMusica);
+        blocoLetra.addEventListener("keydown", function(e) {
+            if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                acionarTrechoMusica();
+            }
+        });
+
+        // --- 5. MAPA ESTELAR REAL (VICÊNCIA-PE, 15/11/2020 19:10 UTC-3) ---
+        (function renderizarCeu() {
+            const canvas = document.getElementById('ceu-estrelado');
+            if (!canvas || !canvas.getContext) return;
+            const ctx = canvas.getContext('2d');
+
+            const LAT = -7.658102;
+            const LON = -35.322030;
+            const dataUTC = new Date(Date.UTC(2020, 10, 15, 22, 10, 0));
+
+            const jd = (dataUTC.getTime() / 86400000) + 2440587.5;
+            const d = jd - 2451545.0;
+            let gmst = (18.697374558 + 24.06570982441908 * d) % 24;
+            if (gmst < 0) gmst += 24;
+            let lstHoras = (gmst + (LON / 15.0)) % 24;
+            if (lstHoras < 0) lstHoras += 24;
+            const lstRad = (lstHoras * 15) * Math.PI / 180;
+            const latRad = LAT * Math.PI / 180;
+
+            const estrelas = {
+                antares: { ra: 16.49, dec: -26.43, mag: 1.06, nome: "Antares" },
+                graffias: { ra: 16.09, dec: -19.81, mag: 2.62 },
+                dschubba: { ra: 16.01, dec: -22.62, mag: 2.32 },
+                sargas: { ra: 17.62, dec: -43.00, mag: 1.87 },
+                shaula: { ra: 17.56, dec: -37.10, mag: 1.62 },
+                kausAust: { ra: 18.40, dec: -34.38, mag: 1.85 },
+                nunki: { ra: 18.92, dec: -26.30, mag: 2.02 },
+                ascella: { ra: 19.04, dec: -29.88, mag: 2.60 },
+                kausMedia: { ra: 18.35, dec: -29.83, mag: 2.70 },
+                kausBor: { ra: 18.47, dec: -25.42, mag: 2.81 },
+                vega: { ra: 18.62, dec: 38.78, mag: 0.03, nome: "Vega" },
+                altair: { ra: 19.85, dec: 8.87, mag: 0.77, nome: "Altair" },
+                deneb: { ra: 20.69, dec: 45.28, mag: 1.25 },
+                denebAlgedi: { ra: 21.78, dec: -16.13, mag: 2.87 },
+                dabih: { ra: 20.35, dec: -14.78, mag: 3.08 },
+                algedi: { ra: 20.30, dec: -12.54, mag: 3.57 },
+                fomalhaut: { ra: 22.96, dec: -29.62, mag: 1.16, nome: "Fomalhaut" },
+                sadalmelik: { ra: 22.10, dec: -0.32, mag: 2.96 },
+                sadalsuud: { ra: 21.53, dec: -5.57, mag: 2.91 },
+                skat: { ra: 22.91, dec: -15.82, mag: 3.27 },
+                markab: { ra: 23.08, dec: 15.21, mag: 2.49 },
+                scheat: { ra: 23.06, dec: 28.08, mag: 2.42 },
+                algenib: { ra: 0.22, dec: 15.18, mag: 2.83 },
+                alpheratz: { ra: 0.14, dec: 29.09, mag: 2.06 },
+                enif: { ra: 21.74, dec: 9.88, mag: 2.38 },
+                alnair: { ra: 22.14, dec: -46.96, mag: 1.74 },
+                tiaki: { ra: 22.71, dec: -46.88, mag: 2.10 },
+                ankaa: { ra: 0.44, dec: -42.31, mag: 2.39 },
+                achernar: { ra: 1.63, dec: -57.24, mag: 0.46, nome: "Achernar" },
+                diphda: { ra: 0.73, dec: -17.99, mag: 2.04 },
+                menkar: { ra: 3.04, dec: 4.09, mag: 2.53 },
+                atria: { ra: 16.81, dec: -69.03, mag: 1.92 },
+                peacock: { ra: 20.43, dec: -56.74, mag: 1.94 },
+                hamal: { ra: 2.12, dec: 23.46, mag: 2.00 },
+                aldebaran: { ra: 4.60, dec: 16.51, mag: 0.85 }
+            };
+
+            const constelacoes = [
+                ["graffias", "dschubba", "antares", "sargas", "shaula"],
+                ["kausAust", "kausMedia", "kausBor", "nunki", "ascella", "kausAust"],
+                ["vega", "altair", "deneb", "vega"],
+                ["algedi", "dabih", "denebAlgedi", "algedi"],
+                ["sadalsuud", "sadalmelik", "skat"],
+                ["markab", "scheat", "alpheratz", "algenib", "markab"],
+                ["markab", "enif"],
+                ["alnair", "tiaki"],
+                ["ankaa", "achernar"],
+                ["diphda", "menkar"]
+            ];
+
+            const estrelasFundo = [];
+            for (let i = 0; i < 420; i++) {
+                const s1 = Math.sin(i * 12.9898) * 43758.5453;
+                const s2 = Math.sin(i * 78.233) * 29412.1234;
+                const s3 = Math.sin(i * 39.425) * 19283.9182;
+                const r1 = s1 - Math.floor(s1);
+                const r2 = s2 - Math.floor(s2);
+                const r3 = s3 - Math.floor(s3);
+                estrelasFundo.push({
+                    ra: r1 * 24,
+                    dec: Math.asin(2 * r2 - 1) * 180 / Math.PI,
+                    mag: 3.2 + r3 * 2.6,
+                    alpha: 0.25 + r3 * 0.55
+                });
+            }
+
+            function projetar(raHoras, decGraus, cx, cy, escala) {
+                const raRad = (raHoras * 15) * Math.PI / 180;
+                const decRad = decGraus * Math.PI / 180;
+                const ha = lstRad - raRad;
+
+                const sinAlt = Math.sin(decRad) * Math.sin(latRad) +
+                               Math.cos(decRad) * Math.cos(latRad) * Math.cos(ha);
+                const alt = Math.asin(Math.max(-1, Math.min(1, sinAlt)));
+
+                if (alt < -0.15) return null;
+
+                const cosAz = (Math.sin(decRad) - Math.sin(alt) * Math.sin(latRad)) /
+                              (Math.cos(alt) * Math.cos(latRad));
+                let az = Math.acos(Math.max(-1, Math.min(1, cosAz)));
+                if (Math.sin(ha) > 0) az = 2 * Math.PI - az;
+
+                const z = (Math.PI / 2) - alt;
+                const r = escala * Math.tan(z / 2);
+
+                const x = cx - r * Math.sin(az);
+                const y = cy - r * Math.cos(az);
+
+                return { x: x, y: y, alt: alt };
+            }
+
+            function desenhar() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+
+                const cx = canvas.width / 2;
+                const cy = canvas.height / 2;
+                const escala = Math.max(canvas.width, canvas.height) * 0.62;
+
+                const grad = ctx.createRadialGradient(cx, cy, 20, cx, cy, Math.max(canvas.width, canvas.height) * 0.8);
+                grad.addColorStop(0, '#131b33');
+                grad.addColorStop(0.55, '#0b0f1d');
+                grad.addColorStop(1, '#060810');
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
+                ctx.lineWidth = 1;
+                [0.45, 0.9].forEach(function(fator) {
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, escala * fator, 0, Math.PI * 2);
+                    ctx.stroke();
+                });
+
+                estrelasFundo.forEach(function(est) {
+                    const pos = projetar(est.ra, est.dec, cx, cy, escala);
+                    if (!pos) return;
+                    const raio = Math.max(0.5, (6 - est.mag) * 0.45);
+                    ctx.beginPath();
+                    ctx.arc(pos.x, pos.y, raio, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(220, 232, 255, ' + est.alpha + ')';
+                    ctx.fill();
+                });
+
+                ctx.strokeStyle = 'rgba(130, 175, 255, 0.25)';
+                ctx.lineWidth = 1;
+                constelacoes.forEach(function(grupo) {
+                    ctx.beginPath();
+                    let iniciou = false;
+                    grupo.forEach(function(chave) {
+                        const est = estrelas[chave];
+                        if (!est) return;
+                        const pos = projetar(est.ra, est.dec, cx, cy, escala);
+                        if (!pos) {
+                            iniciou = false;
+                            return;
+                        }
+                        if (!iniciou) {
+                            ctx.moveTo(pos.x, pos.y);
+                            iniciou = true;
+                        } else {
+                            ctx.lineTo(pos.x, pos.y);
+                        }
+                    });
+                    ctx.stroke();
+                });
+
+                Object.keys(estrelas).forEach(function(k) {
+                    const est = estrelas[k];
+                    const pos = projetar(est.ra, est.dec, cx, cy, escala);
+                    if (!pos) return;
+
+                    const raio = Math.max(1.4, (4.2 - est.mag) * 0.85);
+
+                    const halo = ctx.createRadialGradient(pos.x, pos.y, 0, pos.x, pos.y, raio * 4);
+                    halo.addColorStop(0, 'rgba(255, 255, 255, 0.6)');
+                    halo.addColorStop(1, 'rgba(130, 175, 255, 0)');
+                    ctx.fillStyle = halo;
+                    ctx.beginPath();
+                    ctx.arc(pos.x, pos.y, raio * 4, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.beginPath();
+                    ctx.arc(pos.x, pos.y, raio, 0, Math.PI * 2);
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fill();
+
+                    if (est.nome) {
+                        ctx.font = '10px Arial';
+                        ctx.fillStyle = 'rgba(200, 220, 255, 0.45)';
+                        ctx.fillText(est.nome, pos.x + raio + 5, pos.y + 3);
+                    }
+                });
+            }
+
+            desenhar();
+            window.addEventListener('resize', desenhar);
+        })();
     </script>
 
 </body>
